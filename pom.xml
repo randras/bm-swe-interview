@@ -67,6 +67,19 @@
         <scope>test</scope>
     </dependency>
 
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-test</artifactId>
+		<scope>test</scope>
+		<!-- Exclude JUnit Vintage to avoid running tests twice under JUnit 5 -->
+		<exclusions>
+			<exclusion>
+				<groupId>org.junit.vintage</groupId>
+				<artifactId>junit-vintage-engine</artifactId>
+			</exclusion>
+		</exclusions>
+	</dependency>
+
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
