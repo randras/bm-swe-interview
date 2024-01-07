@@ -1,5 +1,6 @@
-package bankmonitor.model;
+package bankmonitor.repository;
 
+import bankmonitor.model.Transaction;
 import bankmonitor.repository.TransactionRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

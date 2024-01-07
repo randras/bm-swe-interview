@@ -1,7 +1,8 @@
 
-package bankmonitor.model;
+package bankmonitor.controller;
 
 import bankmonitor.controller.TransactionController;
+import bankmonitor.model.Transaction;
 import bankmonitor.repository.TransactionRepository;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
