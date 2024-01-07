@@ -14,8 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static bankmonitor.model.TransactionMapper.convertFromDTO;
-import static bankmonitor.model.TransactionMapper.parseDTO;
+import static bankmonitor.model.TransactionMapper.*;
 
 @Service
 @Slf4j
@@ -45,7 +44,7 @@ public class TransactionService {
 
     @Transactional
     public Optional<TransactionDTO> updateTransaction(Long id, String transactionJsonData) {
-        JSONObject updateJson = new JSONObject(transactionJsonData);
+        TransactionDTO transactionDTO = TransactionMapper.parseDTO(transactionJsonData);
         Optional<Transaction> optionalTransaction = transactionRepository.findById(id);
 
         if (!optionalTransaction.isPresent()) {
@@ -53,16 +52,9 @@ public class TransactionService {
         }
 
         Transaction transaction = optionalTransaction.get();
-        JSONObject trdata = new JSONObject(transaction.getData());
-
-        if (updateJson.has(TransactionConstants.AMOUNT_KEY)) {
-            trdata.put(TransactionConstants.AMOUNT_KEY, updateJson.getInt(TransactionConstants.AMOUNT_KEY));
-        }
-
-        if (updateJson.has(TransactionConstants.REFERENCE_KEY)) {
-            trdata.put(TransactionConstants.REFERENCE_KEY, updateJson.getString(TransactionConstants.REFERENCE_KEY));
-        }
-        transaction.setData(trdata.toString());
+        transaction.setAmount(transactionDTO.getAmount());
+        transaction.setReference(transactionDTO.getReference());
+        transaction.setData(mergeJsonData(transaction.getData(),transactionDTO.getData()));
 
         Transaction updatedTransaction = transactionRepository.save(transaction);
 
