@@ -1,11 +1,13 @@
 package bankmonitor.repository;
 
 import bankmonitor.model.Transaction;
-import bankmonitor.repository.TransactionRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.core.env.Environment;
 
+import javax.persistence.EntityManager;
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,11 +19,19 @@ public class TransactionRepositoryTest {
     @Autowired
     private TransactionRepository repository;
 
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private Environment environment;
+
     @Test
     public void testSave(){
-        Transaction transaction = new Transaction("""
-            { "reference": "foo", "amount": 1000.00}
-        """);
+
+        Transaction transaction = Transaction.builder()
+                .reference("foo")
+                .amount(BigDecimal.valueOf(1000))
+                .build();
         transaction.setId(1L);
 
         Transaction savedTransaction = repository.save(transaction);
@@ -36,15 +46,17 @@ public class TransactionRepositoryTest {
 
     @Test
     public void testFindById() {
-        Transaction transaction = new Transaction("""
-            { "reference1": "foo", "amount": 100.00}
-        """);
+        Transaction transaction = Transaction.builder()
+                .reference("foo00")
+                .amount(BigDecimal.valueOf(1000))
+                .data("""
+                        "{reference": "foo", "amount": 1000}
+                        """)
+                .id(1L)
+                .build();
 
-        transaction.setId(1);
 
-        // Call to the save method and force an immediate check with the flush method
         repository.save(transaction);
-        repository.flush();
 
         Optional<Transaction> maybeTransaction = repository.findById(transaction.getId());
         assertTrue(maybeTransaction.isPresent());

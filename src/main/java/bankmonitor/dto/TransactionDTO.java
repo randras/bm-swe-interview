@@ -1,36 +1,33 @@
 package bankmonitor.dto;
 
-import org.json.JSONObject;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
-public record TransactionDTO(
-        long id,
-        LocalDateTime timestamp,
-        String data
-) {
+@Builder
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class TransactionDTO  {
+    private Long id;
+    private BigDecimal amount;
+    private String reference;
+    private String data;
 
-    public static final String REFERENCE_KEY = "reference";
-
-    public TransactionDTO {
-        timestamp = LocalDateTime.now();
-    }
-
-    public Integer getAmount() {
-        JSONObject jsonData = new JSONObject(this.data);
-        if (jsonData.has("amount")) {
-            return jsonData.getInt("amount");
-        } else {
-            return -1;
+    public BigDecimal getAmount() {
+        if (amount == null) {
+            return BigDecimal.valueOf(-1);
         }
+        return amount;
     }
 
     public String getReference() {
-        JSONObject jsonData = new JSONObject(this.data);
-        if (jsonData.has(REFERENCE_KEY)) {
-            return jsonData.getString(REFERENCE_KEY);
-        } else {
-            return "";
-        }
+       if (reference == null) {
+           return "";
+       }
+       return reference;
     }
 }

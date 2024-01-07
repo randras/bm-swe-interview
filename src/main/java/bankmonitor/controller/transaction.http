@@ -1,0 +1,14 @@
+GET http://localhost:3000/transactions
+
+###
+
+POST http://localhost:3000/transactions
+
+{ "amount": 54321, "sender": "Bankmonitor", "recipient": "John Doe" }
+
+
+###
+
+PUT http://localhost:3000/transactions/1
+
+{ "amount": 54321, "sender": "Bankmonitor", "recipient": "John Doe" }

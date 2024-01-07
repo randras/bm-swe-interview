@@ -2,8 +2,12 @@
 package bankmonitor.controller;
 
 import bankmonitor.controller.TransactionController;
+import bankmonitor.dto.TransactionDTO;
 import bankmonitor.model.Transaction;
+import bankmonitor.model.TransactionMapper;
 import bankmonitor.repository.TransactionRepository;
+import bankmonitor.service.TransactionService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -29,26 +34,20 @@ public class TransactionControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private TransactionRepository transactionRepository;
+    private TransactionService transactionService;
 
     @Test
     public void testGetAllTransactions() throws Exception {
-        when(transactionRepository.findAll()).thenReturn(Arrays.asList(
-                new Transaction("""
-                            { "reference": "foo", "amount": 100}
-                            """
-                ),
-                new Transaction("""
-                            { "reference": "foo", "amount": 100}
-                            """
-                )
+        when(transactionService.findAllTransactions()).thenReturn(Arrays.asList(
+                TransactionDTO.builder().reference("ref_1").amount(BigDecimal.ONE).build(),
+                TransactionDTO.builder().reference("ref_2").amount(BigDecimal.ZERO).build()
         ));
 
         mockMvc.perform(get("/transactions"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", Matchers.hasSize(2)));
 
-        verify(transactionRepository, times(1)).findAll();
+        verify(transactionService, times(1)).findAllTransactions();
     }
 
     @Test
@@ -57,8 +56,8 @@ public class TransactionControllerTest {
                         { "reference": "foo", "amount": 100}
                         """;
 
-        Transaction transaction = new Transaction(jsonData);
-        when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
+        TransactionDTO transactionDTO = TransactionMapper.parseDTO(jsonData);
+        when(transactionService.createNewTransaction(any(String.class))).thenReturn(transactionDTO);
 
         mockMvc.perform(post("/transactions")
                         .contentType("application/json")
@@ -66,10 +65,10 @@ public class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reference",Matchers.equalTo("foo")))
                 .andExpect(jsonPath("$.amount",Matchers.equalTo(100)))
-                .andExpect(jsonPath("$.data",Matchers.equalTo(jsonData.replaceAll("\\s+",""))));
+                .andExpect(jsonPath("$.data",Matchers.equalTo(jsonData)));
         ;
 
-        verify(transactionRepository, times(1)).save(any(Transaction.class));
+        verify(transactionService, times(1)).createNewTransaction(any(String.class));
     }
 
     @Test
@@ -78,19 +77,17 @@ public class TransactionControllerTest {
         String jsonData = """
                         { "reference": "foo0", "amount": 1000}
                         """;
-        Transaction transaction = new Transaction(jsonData);
-        when(transactionRepository.findById(id)).thenReturn(Optional.of(transaction));
-        when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
+        TransactionDTO transactionDTO = TransactionMapper.parseDTO(jsonData);
+        when(transactionService.updateTransaction(id, jsonData)).thenReturn(Optional.of(transactionDTO));
 
         mockMvc.perform(put("/transactions/{id}", id)
                         .contentType("application/json")
-                        .content("{}"))
+                        .content(jsonData))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reference",Matchers.equalTo("foo0")))
                 .andExpect(jsonPath("$.amount",Matchers.equalTo(1000)))
-                .andExpect(jsonPath("$.data",Matchers.equalTo(jsonData.replaceAll("\\s+",""))));
+                .andExpect(jsonPath("$.data",Matchers.equalTo(jsonData)));
 
-        verify(transactionRepository, times(1)).findById(id);
-        verify(transactionRepository, times(1)).save(any(Transaction.class));
+        verify(transactionService, times(1)).updateTransaction(id, jsonData);
     }
 }
