@@ -1,10 +1,8 @@
 package bankmonitor.controller;
 
 import bankmonitor.dto.TransactionDTO;
-import bankmonitor.model.Transaction;
-import bankmonitor.repository.TransactionRepository;
 import bankmonitor.service.TransactionService;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController("/")
-@Log
+@Slf4j
 public class TransactionController {
 
     private TransactionService transactionService;

@@ -1,19 +1,16 @@
 
 package bankmonitor.controller;
 
-import bankmonitor.controller.TransactionController;
 import bankmonitor.dto.TransactionDTO;
-import bankmonitor.model.Transaction;
 import bankmonitor.model.TransactionMapper;
-import bankmonitor.repository.TransactionRepository;
 import bankmonitor.service.TransactionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -81,7 +78,7 @@ public class TransactionControllerTest {
         when(transactionService.updateTransaction(id, jsonData)).thenReturn(Optional.of(transactionDTO));
 
         mockMvc.perform(put("/transactions/{id}", id)
-                        .contentType("application/json")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonData))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reference",Matchers.equalTo("foo0")))
@@ -89,5 +86,15 @@ public class TransactionControllerTest {
                 .andExpect(jsonPath("$.data",Matchers.equalTo(jsonData)));
 
         verify(transactionService, times(1)).updateTransaction(id, jsonData);
+    }
+
+    @Test
+    public void givenNonExistingID_thenBadRequest() throws Exception {
+        when(transactionService.updateTransaction(anyLong(), anyString())).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/transactions/1")
+                        .content("")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 }
