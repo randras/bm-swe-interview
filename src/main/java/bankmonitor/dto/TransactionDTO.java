@@ -1,5 +1,6 @@
 package bankmonitor.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TransactionDTO  {
+    @JsonIgnore
     private Long id;
     private BigDecimal amount;
     private String reference;
